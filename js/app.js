@@ -5,19 +5,20 @@
 
 $(document).ready(function() {
     // DOM is now ready
-
+/*
     function NewsSource(name, url, formatFunction) {
         this.name = name;
         this.url = url;
         this.formatFunction = formatFunction;
     }
-
+*/
     function Article(sourceId) {
         this.sourceId = sourceId;
     }
 
     var sources = [];
-    sources.push(new NewsSource('Reddit Top Stories', 'https://www.reddit.com/top.json', createRedditArticle));
+    //sources.push(new NewsSource('Reddit Top Stories', 'https://www.reddit.com/top.json', createRedditArticle));
+    sources.push({name: 'Reddit Top Stories', url: 'https://www.reddit.com/top.json', formatFunction: createRedditArticle});
 
     //var url = {};
     //url.mashable = "http://mashable.com/stories.json";
