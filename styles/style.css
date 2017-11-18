@@ -4,7 +4,46 @@
   margin: 0 auto;
 }
 
-#popUp {
+#element_to_pop_up {
+  background-color:#fff;
+  border-radius:15px;
+  color:#000;
+  display:none;
+  padding:20px;
+  min-width:20%;
+  min-height: 20%;
+  max-width: 60%;
+  max-height: 80%;
+}
+
+
+.pop-content2222222 .pop-image {
+  width: 80%;
+  height: auto;
+  float: left;
+  margin: 1%;
+
+}
+
+.pop-content .pop-image img {
+  width: 80%;
+  border-radius: 10px;
+}
+
+.pop-content h3 {
+  font-size: 20px;
+  margin-bottom: 0;
+  color: #FE052C;
+}
+
+.pop-content h6 {
+  font-size: 16px;
+  margin-top: 15px;
+  color: #666;
+}
+
+#popUp2 {
+  display: none;
   opacity: 0.95;
   position: absolute;
   top: 0;
@@ -15,7 +54,7 @@
 }
 
 #popUp .closePopUp {
-  position: absolute;
+  position: relative;
   top: 20px;
   right: 20px;
   font-size: 40px;
@@ -70,7 +109,7 @@ header h1 {
   color: #FFF;
   padding: 10px 2%;
   margin: 0;
-  width: 16%;
+  width: 26%;
   float: left;
   padding-left: 0;
 }
@@ -78,7 +117,7 @@ header h1 {
 /* Header navigation bar */
 header nav {
   padding: 10px 2%;
-  width: 76%;
+  width: 66%;
   float: right;
   text-align: right;
   line-height: 30px;
@@ -190,6 +229,7 @@ nav ul ul li {
   border-bottom: 1px solid #ccc;
   transition: 0.2s all;
 }
+
 
 .article:hover {
   padding: 0 2%;

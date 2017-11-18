@@ -9,25 +9,61 @@ $(document).ready(function() {
     // Setup global vars
     var sources = [];
 
+    $(function() {
+        $('.trigger-popup').hover(function() {
+            console.log("triggered popup");
+            //$('div#popUp').show();
+        }, function() {
+            console.log("not hover");
+            //$('div#popUp').hide();
+        });
+    });
+
     $(document).on('click', '.article', function() {
         console.log("Clicked article " + $(this).html());
+        $('div#popUp').show();
         // use $(this)
         //$('#popUp').removeClass('hidden').removeClass('loader');
     });
 
+    $(document).on('mouseenter', 'img.has-popup-image', function() {
+        //console.log($(this).parent().parent().find('.articleSynopsis').text());
+        $('#element_to_pop_up').bPopup({
+            content:'image', //'ajax', 'iframe' or 'image'
+            contentContainer:'.pop-image',
+            loadUrl: this.src
+        });
+        $('.pop-title').text($(this).parent().parent().find('a.articleTitle').text());
+        $('.pop-synopsis').text($(this).parent().parent().find('.articleSynopsis').text());
+
+        // TODO - below doesn't work
+        var $img = $('.pop-image img');
+        console.log($img.attr('src') );
+        if($img.height > $img.width) {
+            $img.attr('height', '70%');
+            $img.attr('width', 'auto');
+        }
+        //$('img.pop-src').attr('src', this.src);
+        //$('pop-desc')
+
+    });
+
     $(document).on('click', 'ul.categories a', function() {
         console.log($(this).html());
+        $('ul.categories').hide();
         handleCategoryClick(this);
 
     });
 
     $(document).on('click', 'ul.sources a', function() {
         console.log("Clicked source " + $(this).html());
+        $('ul.sources').hide();
         handleSourceClick(this);
     });
 
     $(document).on('click', 'ul.story-type a', function() {
         console.log("Clicked story type " + $(this).html());
+        $('ul.story-type').hide();
         handleStoryTypeClick(this);
     });
 
@@ -117,10 +153,11 @@ $(document).ready(function() {
     function getNewsFromSources(selectedSources) {
         for (var row in selectedSources) {
 
+            // TODO take out IF
             if (row == 0) {
                 console.log("starting ajax for source " + selectedSources[row].url);
                 $.ajax({
-                    url: 'https://newsapi.org/v1/articles?source=' + selectedSources[row].id.trim() + '&apiKey=4584e350d31b47829c394777b6fd9ede',
+                    url: getUrlForStoryType("top2") +'source=' + selectedSources[row].id.trim() + '&apiKey=4584e350d31b47829c394777b6fd9ede',
                     success: function (results) {
                         // CALL SUCCESS FUNCTION(RESULTS) --> RETURNS ARRAY OF ARTICLES
                         //sources[row].successFunction(results);
@@ -131,6 +168,16 @@ $(document).ready(function() {
                 });
             }
 
+        }
+    }
+
+    function getUrlForStoryType(storyType) {
+        if (storyType.toLowerCase() === "top") {
+            return 'https://newsapi.org/v2/top-headlines?';
+        } else if (storyType.toLowerCase() === "latest") {
+            return 'https://newsapi.org/v2/top-headlines?';
+        } else {
+            return 'https://newsapi.org/v1/articles?';
         }
     }
 
@@ -236,14 +283,14 @@ $(document).ready(function() {
     }
     function formatArticle(article) {
         var result =
-            '<article class="article ' + article.sourceId + '">' +
+            '<article class="article trigger-popup"' + article.sourceId + '">' +
                 '<section class="featuredImage"> ' +
                     //'<img src="' + article.preview.images[0].source.url + '" alt="" /> ' +
-                    '<img src="' + article.thumbUrl + '" alt="" /> ' +
+                    '<img src="' + article.thumbUrl + '" class="has-popup-image" /> ' +
                 '</section> ' +
                 '<section class="articleContent"> ' +
-                    '<a href="' + article.url + '"><h3>' + article.title + '</h3></a> ' +
-                    '<h6>' + article.category + '</h6> ' +
+                    '<a href="' + article.url + '" class="articleTitle" target="_blank"><h3>' + article.title + '</h3></a> ' +
+                    '<h6 class="articleSynopsis">' + article.category + '</h6> ' +
 
                 '</section> ' +
                 '<section class="impressions">' + article.impressions +
