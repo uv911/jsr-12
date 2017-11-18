@@ -218,11 +218,13 @@ nav ul ul li {
 }
 
 .article .articleContent h3 {
+  font-size: 20px;
   margin-bottom: 0;
   color: #FE052C;
 }
 
 .article .articleContent h6 {
+  font-size: 16px;
   margin-top: 0;
   color: #666;
 }

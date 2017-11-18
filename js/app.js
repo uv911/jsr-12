@@ -6,13 +6,75 @@
 $(document).ready(function() {
     // DOM is now ready
 
-
+    // Setup global vars
+    var sources = [];
 
     $(document).on('click', '.article', function() {
         console.log("Clicked article " + $(this).html());
         // use $(this)
         //$('#popUp').removeClass('hidden').removeClass('loader');
     });
+
+    $(document).on('click', 'ul.categories a', function() {
+        console.log($(this).html());
+        handleCategoryClick(this);
+
+    });
+
+    $(document).on('click', 'ul.sources a', function() {
+        console.log("Clicked source " + $(this).html());
+        handleSourceClick(this);
+    });
+
+    $(document).on('click', 'ul.story-type a', function() {
+        console.log("Clicked story type " + $(this).html());
+        handleStoryTypeClick(this);
+    });
+
+    function handleCategoryClick(menuitem) {
+        var $selectedCat = $('.selected-category');
+        var newCat = $(menuitem).html();
+        if (newCat !== $selectedCat.html()) {
+            console.log(menuitem);
+            $selectedCat.html(newCat);
+            getSources(newCat);
+        }
+    }
+
+    function handleSourceClick(menuitem) {
+        var $selectedSrc = $('.selected-source');
+        var newSrc = $(menuitem).html();
+        if (newSrc !== $selectedSrc.html()) {
+            console.log(menuitem);
+            $selectedSrc.html(newSrc);
+            console.log("in there" + $(menuitem).attr('id'), sources);
+
+            getNewsFromSources(getMatchingSource($(menuitem).attr('id') , sources));
+        }
+    }
+
+    function getMatchingSource(sourceId, sourcesArray) {
+        for (var row in sourcesArray) {
+            console.log(sourcesArray[row].id);
+
+
+            if(sourcesArray[row].id === sourceId) {
+                var arr = [];
+                arr.push(sourcesArray[row]);
+                return arr;
+            }
+        }
+    }
+
+    function handleStoryTypeClick(menuitem) {
+        var $selectedStoryType = $('.selected-story-type');
+        var newStoryType = $(menuitem).html();
+        if (newStoryType !== $selectedStoryType.html()) {
+            console.log(menuitem);
+            $selectedStoryType.html(newStoryType);
+            //getSources($('.selected-category').html());
+        }
+    }
 /*
     function NewsSource(name, url, formatFunction) {
         this.name = name;
@@ -24,9 +86,12 @@ $(document).ready(function() {
         this.sourceId = sourceId;
     }
 
-    var category = 'technology';
-    var sources = [];
-    getSources(category);
+
+    createCategoryDropDown();
+    createStoryTypeDropDown();
+
+    //var sources = [];
+    getSources($('.selected-category').html());
     //sources.push(new NewsSource('Reddit Top Stories', 'https://www.reddit.com/top.json', createRedditArticle));
     //sources.push({name: 'Reddit Top Stories', url: 'https://www.reddit.com/top.json', formatFunction: createRedditArticle});
     //sources.push({name: 'TechCrunch', url: 'https://newsapi.org/v1/articles?source=techcrunch&apiKey=4584e350d31b47829c394777b6fd9ede', formatFunction: createNewsApiArticle});
@@ -35,6 +100,17 @@ $(document).ready(function() {
     //url.mashable = "http://mashable.com/stories.json";
 
     //console.log(sources);
+
+    function createCategoryDropDown() {
+        $('ul.categories').children().remove();
+        var categories = ['Business', 'Entertainment', 'Gaming', 'General', 'Health-and-Medical', 'Music', 'Politics', 'Science-and-Nature', 'Sport', 'Technology'];
+        $('.selected-category').html(categories[0]);
+
+        for (var row in categories) {
+            $('ul.categories').append('<li><a id="' + categories[row].toLowerCase() + '" href="#">' + categories[row].replace(/-/g,' ') + '</a></li>');
+        }
+
+    }
 
 
 
@@ -48,7 +124,7 @@ $(document).ready(function() {
                     success: function (results) {
                         // CALL SUCCESS FUNCTION(RESULTS) --> RETURNS ARRAY OF ARTICLES
                         //sources[row].successFunction(results);
-                        console.log(results);
+                        //console.log(results);
                         handleNewsApiResults(selectedSources[row].id.trim(), results);
 
                     }
@@ -60,7 +136,7 @@ $(document).ready(function() {
 
 
     function getSources(category) {
-
+        sources = [];
         $.ajax({
             url: 'https://newsapi.org/v1/sources?language=en&country=us&category=' + category.trim(),
             success: function (results) {
@@ -69,39 +145,69 @@ $(document).ready(function() {
                     sources.push(results.sources[src]);
                 }
 
-                createSourcesDropDown();
+                createSourcesDropDown(sources);
 
-
-                $('a.selected-source').html('News Source: ' + sources[0].name);
+                //console.log(sources);
+                $('a.selected-source').html(sources[0].name);
 
                 getNewsFromSources(sources);
             }
         });
     }
 
-    function createSourcesDropDown() {
+    function createSourcesDropDown(sources) {
+        $('ul.sources').children().remove();
+        $('.selected-source').html( (sources[0]) ? sources[0] : 'No Sources Available' );
+
         for (var row in sources) {
-            $('ul.sources').append('<li><a href="#">' + sources[row].name + '</a></li>');
+            $('ul.sources').append('<li><span><a id="' + sources[row].name.toLowerCase().replace(/\ /g,'-') + '" href="#">' + sources[row].name + '</a></li>');
+        }
+
+    }
+
+    function createStoryTypeDropDown() {
+        $('ul.story-type').children().remove();
+        var storyTypes = ['Latest', 'Top', 'Popular'];
+        $('.selected-story-type').html( (storyTypes[0]) ? storyTypes[0] : 'None Available');
+
+        for (var row in storyTypes) {
+            $('ul.story-type').append('<li><a id="' + storyTypes[row].toLowerCase() + '" href="#">' + storyTypes[row].replace(/-/g,' ') + '</a></li>');
         }
 
     }
 
     function handleNewsApiResults(sourceId, results) {
-        //console.log(results.data);
-        console.log(results.articles);
-        //$.each(results.data.children, function (index, value) {
-        $.each(results.articles, function (index, value) {
-            //console.log(value.data);
-            //console.log(value);
-            //var article = formatArticle(sources[row].formatFunction('src' + row, value.data));
-            var article = formatArticle(createNewsApiArticle(sourceId, value));
+        var articles = results.articles;
+        console.log(articles);
+        var $main = $('#main');
+        $main.children().remove();
 
-            $('#main').append(article);
-            //$art.click(articleClickHandler);
-            //console.log($art);
-            //$('section.articleContent h3').text(value.data.title);
+        if (articles.length > 0) {
 
-        });
+            $.each(articles, function (index, value) {
+                //console.log(value.data);
+                //console.log(value);
+                //var article = formatArticle(sources[row].formatFunction('src' + row, value.data));
+                var article = formatArticle(createNewsApiArticle(sourceId, value));
+
+
+                $main.append(article);
+                //$art.click(articleClickHandler);
+                //console.log($art);
+                //$('section.articleContent h3').text(value.data.title);
+
+            });
+        } else {
+            var article =   '<article class="article">' +
+                                '<section class="featuredImage"/>' +
+                                '<section class="articleContent"><h3>No articles found</h3><h6>Please make another selection</h6></section>' +
+                            '</article>';
+
+
+            $main.append(article);
+        }
+
+
     }
 
 
@@ -112,7 +218,8 @@ $(document).ready(function() {
         art.url = dataRow.url;
         art.thumbUrl = dataRow.urlToImage;
         art.title = dataRow.title;
-        art.category = "No Category"; //dataRow.subreddit;
+        art.category = dataRow.description;
+        //art.category = "No Category"; //dataRow.subreddit;
         art.impressions = 1; //dataRow.ups;
         return art;
     }
