@@ -171,24 +171,24 @@ header #search.active a {
 }
 
 header nav a {
-  display:block;
+    display:block;
 	padding:0 10px;
 	color:#FFF;
 	font-size:16px;
 	line-height: 40px;
 	text-decoration:none;
-  transition: 0.2s all;
+    transition: 0.2s all;
 }
 
 header nav a:hover {
-  background-color: #fff;
-  color: #CC0020;
+    background-color: #fff;
+    color: #CC0020;
 }
 
 nav ul {
 	padding:0;
 	margin:0;
-  margin-right: 30px;
+    margin-right: 30px;
 	list-style: none;
 	position: relative;
 	}
@@ -196,14 +196,14 @@ nav ul {
 nav ul li {
 	display:inline-block;
 	background-color: #CC0020;
-  position: relative;
+    position: relative;
 }
 
 nav ul ul {
 	display: none;
 	position: absolute;
 	top: 40px;
-  right: -30px;
+    right: -30px;
 }
 
 /* Display Dropdowns on Hover */
@@ -213,7 +213,7 @@ nav ul li:hover > ul {
 
 /* First Tier Dropdown */
 nav ul ul li {
-	width:170px;
+    width:190px;
 	float:none;
 	display:list-item;
 	position: relative;
@@ -221,26 +221,26 @@ nav ul ul li {
 
 /* Main Section */
 #main {
-  margin-top: 65px;
+    margin-top: 65px;
 }
 
 /* Individual Article Styling */
 .article {
-  border-bottom: 1px solid #ccc;
-  transition: 0.2s all;
+    border-bottom: 1px solid #ccc;
+    transition: 0.2s all;
 }
 
 
 .article:hover {
-  padding: 0 2%;
-  background-color: #eee;
+    padding: 0 2%;
+    background-color: #eee;
 }
 
 .article .featuredImage {
-  width: 12%;
-  float: left;
-  margin: 1.5%;
-  max-width: 60px;
+    width: 12%;
+    float: left;
+    margin: 1.5%;
+    max-width: 60px;
 }
 
 .article .featuredImage img {

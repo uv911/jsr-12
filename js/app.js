@@ -50,20 +50,21 @@ $(document).ready(function() {
 
     $(document).on('click', 'ul.categories a', function() {
         console.log($(this).html());
-        $('ul.categories').hide();
+        //$('ul.categories').parent().trigger('mouseleave');
+        //$('ul.categories').hide();
         handleCategoryClick(this);
 
     });
 
     $(document).on('click', 'ul.sources a', function() {
         console.log("Clicked source " + $(this).html());
-        $('ul.sources').hide();
+        //$('ul.sources').hide();
         handleSourceClick(this);
     });
 
     $(document).on('click', 'ul.story-type a', function() {
         console.log("Clicked story type " + $(this).html());
-        $('ul.story-type').hide();
+        //$('ul.story-type').hide();
         handleStoryTypeClick(this);
     });
 

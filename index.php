@@ -4,7 +4,7 @@
     <head>
       <meta charset="utf-8">
       <meta http-equiv="x-ua-compatible" content="ie=edge">
-      <title>Good News Feedr</title>
+      <title>Good News</title>
       <link rel="stylesheet" href="styles/normalize.css" media="screen" charset="utf-8">
       <link rel="stylesheet" href="styles/html5bp.css" media="screen" charset="utf-8">
       <link rel="stylesheet" href="styles/style.css" media="screen" charset="utf-8">
@@ -20,7 +20,7 @@
 
         <header>
           <section class="container">
-            <a href="#"><h1 class="trigger-popup">News Feedr</h1></a>
+            <a href="#"><h1 class="trigger-popup">Good News</h1></a>
             <nav>
               <ul>
                 <li><a href="#" class="selected-category"></a>
