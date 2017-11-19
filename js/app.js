@@ -26,13 +26,6 @@ $(document).ready(function() {
         });
     });
 
-    $(document).on('click', '.article', function() {
-        console.log("Clicked article " + $(this).html());
-        $('div#popUp').show();
-        // use $(this)
-        //$('#popUp').removeClass('hidden').removeClass('loader');
-    });
-
     $(document).on('mouseenter', 'img.has-popup-image', function() {
         //console.log($(this).parent().parent().find('.articleSynopsis').text());
         $('#element_to_pop_up').bPopup({
@@ -62,18 +55,18 @@ $(document).ready(function() {
     });
 
     function hideClickedMenu(clickedItem) {
-        //console.log($(this).html());
         var $parent = $(clickedItem).parent().parent();
-        //console.log($parent);
 
         $parent.find('li').css('display', 'none');
+
+        // TODO I think this is a little bit of a hack but it works
         setTimeout(function() {
             $parent.find('li').css('display', '');
         }, 300);
     }
 
     $(document).on('click', 'ul.sources a', function() {
-        //console.log("Clicked source " + $(this).html());
+        console.log("Clicked source " + $(this).html());
         hideClickedMenu(this);
         handleSourceClick(this);
     });
@@ -84,6 +77,7 @@ $(document).ready(function() {
         handleStoryTypeClick(this);
     });
 
+    // TODO refactor to generically handle different menus
     function handleCategoryClick(menuitem) {
         var $selectedCat = $('.selected-category');
         var newCat = $(menuitem).html();
@@ -98,18 +92,14 @@ $(document).ready(function() {
         var $selectedSrc = $('.selected-source');
         var newSrc = $(menuitem).html();
         if (newSrc !== $selectedSrc.html()) {
-            console.log(menuitem);
             $selectedSrc.html(newSrc);
-            console.log("in there" + $(menuitem).attr('id'), sources);
-
             getNewsFromSources(getMatchingSource($(menuitem).attr('id') , sources));
         }
     }
 
     function getMatchingSource(sourceId, sourcesArray) {
         for (var row in sourcesArray) {
-            console.log(sourcesArray[row].id);
-
+            //console.log(sourcesArray[row].id);
 
             if(sourcesArray[row].id === sourceId) {
                 var arr = [];
@@ -123,36 +113,29 @@ $(document).ready(function() {
         var $selectedStoryType = $('.selected-story-type');
         var newStoryType = $(menuitem).html();
         if (newStoryType !== $selectedStoryType.html()) {
-            console.log(menuitem);
+            //console.log(menuitem);
             $selectedStoryType.html(newStoryType);
-            //getSources($('.selected-category').html());
+            getNewsFromSources(getMatchingSource($('.selected-source').html().toLowerCase().replace(/\ /g,'-') , sources));
         }
     }
-/*
-    function NewsSource(name, url, formatFunction) {
-        this.name = name;
-        this.url = url;
-        this.formatFunction = formatFunction;
-    }
-*/
+
     function Article(sourceId) {
         this.sourceId = sourceId;
     }
 
+    function getNewsApiKey() {
+        // TODO change to get from environment
+        return '4584e350d31b47829c394777b6fd9ede';
+    }
 
     createCategoryDropDown();
     createStoryTypeDropDown();
+    getSources($('.selected-category').html());
 
     //var sources = [];
-    getSources($('.selected-category').html());
     //sources.push(new NewsSource('Reddit Top Stories', 'https://www.reddit.com/top.json', createRedditArticle));
     //sources.push({name: 'Reddit Top Stories', url: 'https://www.reddit.com/top.json', formatFunction: createRedditArticle});
-    //sources.push({name: 'TechCrunch', url: 'https://newsapi.org/v1/articles?source=techcrunch&apiKey=4584e350d31b47829c394777b6fd9ede', formatFunction: createNewsApiArticle});
-    //sources.push({name: 'TechCrunch', url: 'https://newsapi.org/v1/articles?source=techcrunch&apiKey=4584e350d31b47829c394777b6fd9ede', successFunction: handleNewsApiResults, formatFunction: createNewsApiArticle});
-
     //url.mashable = "http://mashable.com/stories.json";
-
-    //console.log(sources);
 
     function createCategoryDropDown() {
         $('ul.categories').children().remove();
@@ -165,67 +148,69 @@ $(document).ready(function() {
 
     }
 
-
-
     function getNewsFromSources(selectedSources) {
         for (var row in selectedSources) {
 
-            // TODO take out IF
-            if (row == 0) {
-                console.log("starting ajax for source " + selectedSources[row].url);
-                $.ajax({
-                    url: getUrlForStoryType("top2") +'source=' + selectedSources[row].id.trim() + '&apiKey=4584e350d31b47829c394777b6fd9ede',
-                    success: function (results) {
-                        // CALL SUCCESS FUNCTION(RESULTS) --> RETURNS ARRAY OF ARTICLES
-                        //sources[row].successFunction(results);
-                        //console.log(results);
-                        handleNewsApiResults(selectedSources[row].id.trim(), results);
+            console.log("starting ajax for source " + selectedSources[row].url);
+            $.ajax({
+                url: getUrlForStoryType($('.selected-story-type').html().toLowerCase()) +'sources=' + selectedSources[row].id.trim() + '&apiKey=' + getNewsApiKey(),
+                success: function (results) {
+                    // CALL SUCCESS FUNCTION(RESULTS) --> RETURNS ARRAY OF ARTICLES
+                    //sources[row].successFunction(results);
+                    //console.log(results);
+                    handleNewsApiResults(selectedSources[row].id.trim(), results);
 
-                    }
-                });
-            }
-
+                }
+            });
         }
     }
 
     function getUrlForStoryType(storyType) {
+        var url = '';
         if (storyType.toLowerCase() === "top") {
-            return 'https://newsapi.org/v2/top-headlines?';
+            url = 'https://newsapi.org/v2/top-headlines?';
         } else if (storyType.toLowerCase() === "latest") {
-            return 'https://newsapi.org/v2/top-headlines?';
+            url = 'https://newsapi.org/v2/everything?sortBy=publishedAt&';
+        } else if (storyType.toLowerCase() === "popular") {
+            url = 'https://newsapi.org/v2/everything?sortBy=popularity&';
         } else {
-            return 'https://newsapi.org/v1/articles?';
+            url = 'https://newsapi.org/v2/top-headlines?';
         }
+        console.log(url);
+        return url;
     }
 
 
     function getSources(category) {
         sources = [];
         $.ajax({
-            url: 'https://newsapi.org/v1/sources?language=en&country=us&category=' + category.trim(),
+            url: 'https://newsapi.org/v2/sources?language=en&country=us' + '&category=' + category.trim() +'&apiKey=' + getNewsApiKey(),
             success: function (results) {
-
+                //console.log(results);
                 for (var src in results.sources) {
                     sources.push(results.sources[src]);
                 }
 
                 createSourcesDropDown(sources);
 
-                //console.log(sources);
-                // TODO change to function selectFirstItem()
-                $('a.selected-source').html(sources[0].name);
-
-                getNewsFromSources(sources);
+                // Select the first source on the menu based on category and get news for that source
+                selectFirstSource(sources);
+                getNewsFromSources(getMatchingSource($('.sources a').first().attr('id') , sources));
             }
         });
     }
 
+    function selectFirstSource(sources) {
+        console.log(sources);
+        $('.selected-source').html( (sources) ? sources[0].name : 'No Sources Available' );
+    }
+
+
     function createSourcesDropDown(sources) {
         $('ul.sources').children().remove();
-        $('.selected-source').html( (sources[0]) ? sources[0] : 'No Sources Available' );
 
         for (var row in sources) {
-            $('ul.sources').append('<li><span><a id="' + sources[row].name.toLowerCase().replace(/\ /g,'-') + '" href="#">' + sources[row].name + '</a></li>');
+            $('ul.sources').append('<li><a id="' + sources[row].id + '" href="#">' + sources[row].name + '</a></li>');
         }
 
     }
@@ -248,19 +233,9 @@ $(document).ready(function() {
         $main.children().remove();
 
         if (articles.length > 0) {
-
             $.each(articles, function (index, value) {
-                //console.log(value.data);
-                //console.log(value);
-                //var article = formatArticle(sources[row].formatFunction('src' + row, value.data));
                 var article = formatArticle(createNewsApiArticle(sourceId, value));
-
-
                 $main.append(article);
-                //$art.click(articleClickHandler);
-                //console.log($art);
-                //$('section.articleContent h3').text(value.data.title);
-
             });
         } else {
             var article =   '<article class="article">' +
@@ -268,14 +243,11 @@ $(document).ready(function() {
                                 '<section class="articleContent"><h3>No articles found</h3><h6>Please make another selection</h6></section>' +
                             '</article>';
 
-
             $main.append(article);
         }
 
 
     }
-
-
 
     function createNewsApiArticle(sourceId, dataRow) {
         //console.log(sourceId);
@@ -319,11 +291,6 @@ $(document).ready(function() {
         return result;
     }
 
-    function articleClickHandler(event) {
-        console.log(event);
-        $('main').hide();
-        $('popUp').show();
-    }
 /*
     functionHandle() {
         <article class="article">
