@@ -16,16 +16,6 @@ $(document).ready(function() {
     // Setup global vars
     var sources = [];
 
-    $(function() {
-        $('.trigger-popup').hover(function() {
-            console.log("triggered popup");
-            //$('div#popUp').show();
-        }, function() {
-            console.log("not hover");
-            //$('div#popUp').hide();
-        });
-    });
-
     $(document).on('mouseenter', 'img.has-popup-image', function() {
         //console.log($(this).parent().parent().find('.articleSynopsis').text());
         $('#element_to_pop_up').bPopup({
@@ -176,7 +166,6 @@ $(document).ready(function() {
         } else {
             url = 'https://newsapi.org/v2/top-headlines?';
         }
-        console.log(url);
         return url;
     }
 
@@ -201,7 +190,7 @@ $(document).ready(function() {
     }
 
     function selectFirstSource(sources) {
-        console.log(sources);
+        //console.log(sources);
         $('.selected-source').html( (sources) ? sources[0].name : 'No Sources Available' );
     }
 
@@ -228,7 +217,7 @@ $(document).ready(function() {
 
     function handleNewsApiResults(sourceId, results) {
         var articles = results.articles;
-        console.log(articles);
+        //console.log(articles);
         var $main = $('#main');
         $main.children().remove();
 
@@ -249,15 +238,37 @@ $(document).ready(function() {
 
     }
 
+    function formatPubDateAsTimeSinceNow(dateString) {
+        // Published Date is in format 2017-11-19T20:00:25Z
+        var timeSince = "";
+
+        if(dateString) {
+            var pubDate = new Date(dateString);
+            //console.log(new Date() + " " + pubDate + " " + (new Date() - pubDate));
+            var mins = Math.floor( (new Date() - pubDate) / (1000 * 60) );
+            // Do all calculations for
+            if (mins < 120) {
+                timeSince =  mins + ' Minutes Ago';
+            } else if (mins < 2880) {
+                timeSince =  Math.floor(mins/60)+ ' Hours Ago';
+            } else if (mins < 20160) {
+                timeSince =  Math.floor(mins/(24 * 60))+ ' Days Ago';
+            } else {
+                timeSince =  Math.floor(mins/(7 * 24 * 60))+ ' Weeks Ago';
+            }
+
+        }
+        return timeSince;
+    }
+
     function createNewsApiArticle(sourceId, dataRow) {
-        //console.log(sourceId);
+        //console.log(dataRow);
         var art = new Article(sourceId);
         art.url = dataRow.url;
         art.thumbUrl = dataRow.urlToImage;
         art.title = dataRow.title;
         art.category = dataRow.description;
-        //art.category = "No Category"; //dataRow.subreddit;
-        art.impressions = 1; //dataRow.ups;
+        art.impressions = formatPubDateAsTimeSinceNow(dataRow.publishedAt);
         return art;
     }
 
