@@ -1,5 +1,12 @@
 /*
   Please add all Javascript code to this file.
+
+  Final Project things to do:
+  1) Get page history/override back functionality to work http://diveintohtml5.info/history.html
+  2) Save cookies of last selected options
+  3) Get Search for term working
+  4) Support all data sources (maybe)
+
 */
 
 
@@ -49,22 +56,31 @@ $(document).ready(function() {
     });
 
     $(document).on('click', 'ul.categories a', function() {
-        console.log($(this).html());
-        //$('ul.categories').parent().trigger('mouseleave');
-        //$('ul.categories').hide();
+        //console.log("Clicked category " + $(this).html());
+        hideClickedMenu(this);
         handleCategoryClick(this);
-
     });
 
+    function hideClickedMenu(clickedItem) {
+        //console.log($(this).html());
+        var $parent = $(clickedItem).parent().parent();
+        //console.log($parent);
+
+        $parent.find('li').css('display', 'none');
+        setTimeout(function() {
+            $parent.find('li').css('display', '');
+        }, 300);
+    }
+
     $(document).on('click', 'ul.sources a', function() {
-        console.log("Clicked source " + $(this).html());
-        //$('ul.sources').hide();
+        //console.log("Clicked source " + $(this).html());
+        hideClickedMenu(this);
         handleSourceClick(this);
     });
 
     $(document).on('click', 'ul.story-type a', function() {
-        console.log("Clicked story type " + $(this).html());
-        //$('ul.story-type').hide();
+        //console.log("Clicked story type " + $(this).html());
+        hideClickedMenu(this);
         handleStoryTypeClick(this);
     });
 
@@ -196,6 +212,7 @@ $(document).ready(function() {
                 createSourcesDropDown(sources);
 
                 //console.log(sources);
+                // TODO change to function selectFirstItem()
                 $('a.selected-source').html(sources[0].name);
 
                 getNewsFromSources(sources);
