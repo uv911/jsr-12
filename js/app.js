@@ -23,9 +23,10 @@ $(document).ready(function() {
             contentContainer:'.pop-image',
             loadUrl: this.src
         });
-        $('.pop-title').text($(this).parent().parent().find('a.articleTitle').text());
-        $('.pop-synopsis').text($(this).parent().parent().find('.articleSynopsis').text());
-        $('.pop-url').attr('href', $(this).parent().parent().find('a.articleTitle').attr('href'));
+        var $artParent = $(this).parent().parent();
+        $('.pop-title').text($artParent.find('a.articleTitle').text());
+        $('.pop-synopsis').text($artParent.find('.articleSynopsis').text());
+        $('.pop-url').attr('href', $artParent.find('a.articleTitle').attr('href'));
 
         // TODO - below doesn't work
         var $img = $('.pop-image img');
