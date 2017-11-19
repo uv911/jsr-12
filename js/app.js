@@ -16,27 +16,33 @@ $(document).ready(function() {
     // Setup global vars
     var sources = [];
 
-    $(document).on('mouseenter', 'img.has-popup-image', function() {
-        //console.log($(this).parent().parent().find('.articleSynopsis').text());
-        $('#element_to_pop_up').bPopup({
-            content:'image', //'ajax', 'iframe' or 'image'
-            contentContainer:'.pop-image',
-            loadUrl: this.src
-        });
-        var $artParent = $(this).parent().parent();
-        $('.pop-title').text($artParent.find('a.articleTitle').text());
-        $('.pop-synopsis').text($artParent.find('.articleSynopsis').text());
-        $('.pop-url').attr('href', $artParent.find('a.articleTitle').attr('href'));
+    $(document).on('click', '.article', function(event) {
+        var $artParent = $(this); //.parent().parent();
 
-        // TODO - below doesn't work
-        var $img = $('.pop-image img');
-        //console.log($img.attr('src') );
-        if($img.height > $img.width) {
-            $img.attr('height', '70%');
-            $img.attr('width', 'auto');
+        // Only do popup if they did not click on the anchor to view the article
+        if(event.target.nodeName !== "H3") {
+            $('#element_to_pop_up').bPopup({
+                content:'image', //'ajax', 'iframe' or 'image'
+                contentContainer:'.pop-image',
+                loadUrl: $artParent.find('img').attr('src')
+            });
+
+            $('.pop-title').text($artParent.find('a.articleTitle').text());
+            $('.pop-synopsis').text($artParent.find('.articleSynopsis').text());
+            $('.pop-url').attr('href', $artParent.find('a.articleTitle').attr('href'));
+
+            // TODO - below doesn't work to alter image attr's
+            var img = $('.pop-image img')[0];
+            console.log(img);
+            console.log(img.naturalHeight);
+
+            if(img.naturalHeight > 600) {
+                var newPct = Math.floor(100 * 500/img.naturalHeight);
+                console.log("height > width so changing to " + newPct + '%');
+                $(img).width( newPct + '%');
+            }
         }
-        //$('img.pop-src').attr('src', this.src);
-        //$('pop-desc')
+
 
     });
 
