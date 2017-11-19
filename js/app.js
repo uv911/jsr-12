@@ -25,10 +25,11 @@ $(document).ready(function() {
         });
         $('.pop-title').text($(this).parent().parent().find('a.articleTitle').text());
         $('.pop-synopsis').text($(this).parent().parent().find('.articleSynopsis').text());
+        $('.pop-url').attr('href', $(this).parent().parent().find('a.articleTitle').attr('href'));
 
         // TODO - below doesn't work
         var $img = $('.pop-image img');
-        console.log($img.attr('src') );
+        //console.log($img.attr('src') );
         if($img.height > $img.width) {
             $img.attr('height', '70%');
             $img.attr('width', 'auto');
