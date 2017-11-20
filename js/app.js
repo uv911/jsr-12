@@ -75,6 +75,16 @@ $(document).ready(function() {
         handleStoryTypeClick(this);
     });
 
+    $(document).on('click', 'a.pop-url', function(event) {
+        event.preventDefault();
+        //$('#element_to_pop_up').hide();
+        $('.b-modal').trigger('click');
+        var href = $(this).attr("href");
+        setTimeout(function() {
+            window.open(href, '_blank');
+        }, 300);
+    });
+
     // TODO refactor to generically handle different menus
     function handleCategoryClick(menuitem) {
         var $selectedCat = $('.selected-category');
