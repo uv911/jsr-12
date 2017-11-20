@@ -31,16 +31,16 @@ $(document).ready(function() {
             $('.pop-synopsis').text($artParent.find('.articleSynopsis').text());
             $('.pop-url').attr('href', $artParent.find('a.articleTitle').attr('href'));
 
-            // TODO - below doesn't work to alter image attr's
             var img = $('.pop-image img')[0];
-            console.log(img);
-            console.log(img.naturalHeight);
+            //console.log(img);
+            console.log(img.naturalHeight + " " + img.height);
 
-            if(img.naturalHeight > 600) {
-                var newPct = Math.floor(100 * 500/img.naturalHeight);
-                console.log("height > width so changing to " + newPct + '%');
+            var targetHeight = 300;
+            //if(img.naturalHeight > targetHeight) {
+                var newPct = Math.floor(100 * targetHeight/img.height);
+                console.log("height > targetHeight so changing to " + newPct + '%');
                 $(img).width( newPct + '%');
-            }
+            //}
         }
 
 
