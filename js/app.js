@@ -44,7 +44,7 @@ $(document).ready(function() {
     }
 
     $(document).on('click', '.article', function(event) {
-        var $artParent = $(this); //.parent().parent();
+        var $artParent = $(this); 
 
         // Only do popup if they did not click on the anchor to view the article
         if(event.target.nodeName !== "H3") {
@@ -59,14 +59,13 @@ $(document).ready(function() {
             $('.pop-url').attr('href', $artParent.find('a.articleTitle').attr('href'));
 
             var img = $('.pop-image img')[0];
-            //console.log(img);
-            console.log(img.naturalHeight + " " + img.height);
+            //console.log(img.naturalHeight + " " + img.height);
 
-            var targetHeight = 500;
+            var targetHeight = 600;
             //if(img.naturalHeight > targetHeight) {
                 var newPct = Math.floor(100 * targetHeight/img.height);
-                console.log("height > targetHeight so changing to " + newPct + '%');
-                $(img).width( newPct + '%');
+                //console.log("height > targetHeight so changing to " + newPct + '%');
+                $(img).width( ((newPct > 100) ? 100 : newPct) + '%');
             //}
         }
 
