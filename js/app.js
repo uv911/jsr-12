@@ -8,7 +8,14 @@
   4) Support all data sources (maybe)
 
 */
+// TODO change to get all keys from environment
+function getFireBaseApiConfig() {
+    return apiKeys[2];
+}
 
+firebase.initializeApp(getFireBaseApiConfig());
+var database = firebase.database();
+var artDbRef = database.ref('players/');
 
 $(document).ready(function() {
     // DOM is now ready
@@ -44,7 +51,7 @@ $(document).ready(function() {
     }
 
     $(document).on('click', '.article', function(event) {
-        var $artParent = $(this); 
+        var $artParent = $(this);
 
         // Only do popup if they did not click on the anchor to view the article
         if(event.target.nodeName !== "H3") {
@@ -211,6 +218,7 @@ $(document).ready(function() {
             console.log("Starting ajax for source " + selectedSources[row].url);
             $.ajax({
                 url: getUrlForStoryType($('.selected-story-type').html().toLowerCase()) +'sources=' + selectedSources[row].id.trim() + '&apiKey=' + getNewsApiKey(),
+
                 success: function (results) {
                     console.log(results);
                     getSentimentScore(selectedSources[row].id.trim(), results.articles);
@@ -222,27 +230,43 @@ $(document).ready(function() {
             });
         }
     }
-    function getCurrentRow(artRow) { return(artRow) }
 
-    function getSentimentScore(sourceId, articleArray) {
+    function getSentimentScore(sourceId, resultArray) {
         var $main = $('#main');
-        for (var row in articleArray) {
+        for (var row in resultArray) {
             (function(index) {
-                var valRow = articleArray[index];
-                if (index <= 1) {
-                    console.log("Starting ajax for article sentiment " + valRow.url);
+                var art = resultArray[index];
+                if (index <= 0) {
+                    console.log("Starting ajax for article sentiment " + art.url);
                     $.ajax({
-                        url: getUrlForNLU(valRow.url),
+                        url: getUrlForNLU(art.url),
                         username: getWatsonUsername(),
                         password: getWatsonPassword(),
-                        success: function (results) {
+
+                        success: function(results) {
                             console.log(results);
-                            valRow.sentiment = Math.floor(100 * results.sentiment.document.score);
 
-                            //handleNewsApiResults(sourceId, articleArray[row]);
-                            var article = formatArticle(createNewsApiArticle(sourceId, valRow));
+                            // if sentiment is exactly 0 then Watson could not read the article so set to unknown
+                            if(results.sentiment.document.score != 0) {
+                                art.sentiment = Math.floor(100 * results.sentiment.document.score);
+
+                                // Only add to the cache if there was a real sentiment score
+                                addToArticleCache(sourceId, art);
+                            } else {
+                                art.sentiment = 'Unavail';
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.log(errorThrown);
+                        },
+                        complete: function(jqXHR, textStatus) {
+                            var article = formatArticle(createNewsApiArticle(sourceId, art));
                             $main.append(article);
-
+                        },
+                        statusCode: {
+                            404: function() {
+                                console.log( "page not found" );
+                            }
                         }
                     });
                 }
@@ -254,6 +278,15 @@ $(document).ready(function() {
                 } */
             }(row));
         }
+    }
+
+    function addToArticleCache(sourceId, art) {
+        artDbRef.child("1234567").set({
+            article: art,
+            sentiment: art.sentiment,
+            publishedAt: art.publishedAt,
+            sourceId: sourceId
+        });
     }
 
     function getUrlForStoryType(storyType) {
@@ -377,6 +410,7 @@ $(document).ready(function() {
         art.thumbUrl = dataRow.urlToImage;
         art.title = dataRow.title;
         art.category = dataRow.description;
+        art.publishedAt = dataRow.publishedAt;
         art.impressions = formatPubDateAsTimeSinceNow(dataRow.publishedAt);
         art.sentiment = dataRow.sentiment;
         return art;
