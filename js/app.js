@@ -12,9 +12,36 @@
 
 $(document).ready(function() {
     // DOM is now ready
+    var slider = $("#ex12a").slider({ id: "slider12a", min: -100, max: 100, value: 0, step: 10 });
+    console.log(slider);
 
     // Setup global vars
     var sources = [];
+
+    $("#ex12a").on('change', function(event) {
+        //console.log(event.value.newValue);
+        var newVal = event.value.newValue;
+        if (newVal <= -10) {
+           $('h1.trigger-popup').html('All News');
+        } else if (newVal > -10) {
+            $('h1.trigger-popup').html('Good News');
+        }
+
+        displayArticles(newVal);
+    });
+
+    function displayArticles(minSentiment) {
+        $('.article').each(function( index ) {
+           var $art = $( this );
+           sentiment = $art.find('.featuredImage h3').text();
+
+           if ( sentiment <= minSentiment ) {
+               $art.hide();
+           } else {
+               $art.show();
+           }
+        });
+    }
 
     $(document).on('click', '.article', function(event) {
         var $artParent = $(this); //.parent().parent();
@@ -35,7 +62,7 @@ $(document).ready(function() {
             //console.log(img);
             console.log(img.naturalHeight + " " + img.height);
 
-            var targetHeight = 300;
+            var targetHeight = 500;
             //if(img.naturalHeight > targetHeight) {
                 var newPct = Math.floor(100 * targetHeight/img.height);
                 console.log("height > targetHeight so changing to " + newPct + '%');
@@ -92,6 +119,11 @@ $(document).ready(function() {
         if (newCat !== $selectedCat.html()) {
             console.log(menuitem);
             $selectedCat.html(newCat);
+
+            // Clear the results
+            var $main = $('#main');
+            $main.children().remove();
+
             getSources(newCat);
         }
     }
@@ -101,6 +133,11 @@ $(document).ready(function() {
         var newSrc = $(menuitem).html();
         if (newSrc !== $selectedSrc.html()) {
             $selectedSrc.html(newSrc);
+
+            // Clear the results
+            var $main = $('#main');
+            $main.children().remove();
+
             getNewsFromSources(getMatchingSource($(menuitem).attr('id') , sources));
         }
     }
@@ -123,6 +160,11 @@ $(document).ready(function() {
         if (newStoryType !== $selectedStoryType.html()) {
             //console.log(menuitem);
             $selectedStoryType.html(newStoryType);
+
+            // Clear the results
+            var $main = $('#main');
+            $main.children().remove();
+
             getNewsFromSources(getMatchingSource($('.selected-source').html().toLowerCase().replace(/\ /g,'-') , sources));
         }
     }
@@ -131,9 +173,17 @@ $(document).ready(function() {
         this.sourceId = sourceId;
     }
 
+    // TODO change to get all keys from environment
     function getNewsApiKey() {
-        // TODO change to get from environment
-        return '4584e350d31b47829c394777b6fd9ede';
+        return apiKeys[0].apiKey;
+    }
+
+    function getWatsonUsername() {
+        return apiKeys[1].username;
+    }
+
+    function getWatsonPassword() {
+        return apiKeys[1].password;
     }
 
     createCategoryDropDown();
@@ -159,17 +209,51 @@ $(document).ready(function() {
     function getNewsFromSources(selectedSources) {
         for (var row in selectedSources) {
 
-            console.log("starting ajax for source " + selectedSources[row].url);
+            console.log("Starting ajax for source " + selectedSources[row].url);
             $.ajax({
                 url: getUrlForStoryType($('.selected-story-type').html().toLowerCase()) +'sources=' + selectedSources[row].id.trim() + '&apiKey=' + getNewsApiKey(),
                 success: function (results) {
-                    // CALL SUCCESS FUNCTION(RESULTS) --> RETURNS ARRAY OF ARTICLES
-                    //sources[row].successFunction(results);
+                    console.log(results);
+                    getSentimentScore(selectedSources[row].id.trim(), results.articles);
+
                     //console.log(results);
-                    handleNewsApiResults(selectedSources[row].id.trim(), results);
+                    //handleNewsApiResults(selectedSources[row].id.trim(), results.articles);
 
                 }
             });
+        }
+    }
+    function getCurrentRow(artRow) { return(artRow) }
+
+    function getSentimentScore(sourceId, articleArray) {
+        var $main = $('#main');
+        for (var row in articleArray) {
+            (function(index) {
+                var valRow = articleArray[index];
+                if (index <= 1) {
+                    console.log("Starting ajax for article sentiment " + valRow.url);
+                    $.ajax({
+                        url: getUrlForNLU(valRow.url),
+                        username: getWatsonUsername(),
+                        password: getWatsonPassword(),
+                        success: function (results) {
+                            console.log(results);
+                            valRow.sentiment = Math.floor(100 * results.sentiment.document.score);
+
+                            //handleNewsApiResults(sourceId, articleArray[row]);
+                            var article = formatArticle(createNewsApiArticle(sourceId, valRow));
+                            $main.append(article);
+
+                        }
+                    });
+                }
+                /*else {
+                    //$.get("https://accesscontrolalloworiginall.herokuapp.com/http://digg.com/api/news/popular.json", function(results) {
+                    $.get(getUrlForNLU("test"), function(results) {
+                        console.log(results);
+                    });
+                } */
+            }(row));
         }
     }
 
@@ -184,6 +268,17 @@ $(document).ready(function() {
         } else {
             url = 'https://newsapi.org/v2/top-headlines?';
         }
+        return url;
+    }
+
+    function getUrlForNLU(artUrl) {
+        var url = 'https://accesscontrolalloworiginall.herokuapp.com/';
+        url += 'https://watson-api-explorer.mybluemix.net/natural-language-understanding/api/v1/analyze?version=2017-02-27&url=' + artUrl +
+            '&features=sentiment&return_analyzed_text=false&clean=true&fallback_to_raw=true&concepts.limit=8&emotion.document=true&entities.limit=50&entities.emotion=false&entities.sentiment=false&keywords.limit=50&keywords.emotion=false&keywords.sentiment=false&relations.model=en-news&semantic_roles.limit=50&semantic_roles.entities=false&semantic_roles.keywords=false&sentiment.document=true';
+        //var url = 'https://accesscontrolalloworiginall.herokuapp.com/http://digg.com/api/news/popular.json';
+        //url = 'https://gateway.watsonplatform.net/natural-language-understanding/api/v1/analyze?version=2017-02-27&url=' + url +
+        //        '&features=sentiment&return_analyzed_text=false&clean=true&fallback_to_raw=true&concepts.limit=8&emotion.document=true&entities.limit=50&entities.emotion=false&entities.sentiment=false&keywords.limit=50&keywords.emotion=false&keywords.sentiment=false&relations.model=en-news&semantic_roles.limit=50&semantic_roles.entities=false&semantic_roles.keywords=false&sentiment.document=true';
+        //console.log(url);
         return url;
     }
 
@@ -233,14 +328,13 @@ $(document).ready(function() {
 
     }
 
-    function handleNewsApiResults(sourceId, results) {
-        var articles = results.articles;
-        //console.log(articles);
+    // TODO delete this function??
+    function handleNewsApiResults(sourceId, articleArray) {
+        //console.log(articleArray);
         var $main = $('#main');
-        $main.children().remove();
 
-        if (articles.length > 0) {
-            $.each(articles, function (index, value) {
+        if (articleArray.length > 0) {
+            $.each(articleArray, function (index, value) {
                 var article = formatArticle(createNewsApiArticle(sourceId, value));
                 $main.append(article);
             });
@@ -252,8 +346,6 @@ $(document).ready(function() {
 
             $main.append(article);
         }
-
-
     }
 
     function formatPubDateAsTimeSinceNow(dateString) {
@@ -287,6 +379,7 @@ $(document).ready(function() {
         art.title = dataRow.title;
         art.category = dataRow.description;
         art.impressions = formatPubDateAsTimeSinceNow(dataRow.publishedAt);
+        art.sentiment = dataRow.sentiment;
         return art;
     }
 
@@ -298,6 +391,7 @@ $(document).ready(function() {
         art.title = dataRow.title;
         art.category = dataRow.subreddit;
         art.impressions = dataRow.ups;
+        art.sentiment = "0.5";
         return art;
     }
     function formatArticle(article) {
@@ -306,6 +400,7 @@ $(document).ready(function() {
                 '<section class="featuredImage"> ' +
                     //'<img src="' + article.preview.images[0].source.url + '" alt="" /> ' +
                     '<img src="' + article.thumbUrl + '" class="has-popup-image" /> ' +
+                    '<h3>' + article.sentiment + '</h3>' +
                 '</section> ' +
                 '<section class="articleContent"> ' +
                     '<a href="' + article.url + '" class="articleTitle" target="_blank"><h3>' + article.title + '</h3></a> ' +
@@ -319,24 +414,5 @@ $(document).ready(function() {
 
         return result;
     }
-
-/*
-    functionHandle() {
-        <article class="article">
-            <section class="featuredImage">
-            <img src="images/article_placeholder_1.jpg" alt="" />
-            </section>
-            <section class="articleContent">
-            <a href="#"><h3>{{article.title}}</h3></a>
-        <h6>Lifestyle</h6>
-        </section>
-        <section class="impressions">
-            526
-            </section>
-            <div class="clearfix"></div>
-            </article>
-    }
-*/
-
 
 })

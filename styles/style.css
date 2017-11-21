@@ -277,3 +277,16 @@ nav ul ul li {
   text-align: right;
   color: #097FB2;
 }
+
+#slider12a .slider-track-high, #slider12c .slider-track-high {
+    background: green;
+}
+
+#slider12b .slider-track-low, #slider12c .slider-track-low {
+    background: red;
+}
+
+#slider12c .slider-selection {
+    background: yellow;
+}
+
