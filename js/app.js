@@ -19,8 +19,15 @@ var artDbRef = database.ref('players/');
 
 $(document).ready(function() {
     // DOM is now ready
-    var slider = $("#ex12a").slider({ id: "slider12a", min: -100, max: 100, value: 0, step: 10 });
-    console.log(slider);
+
+    // Enable tooltips for the whole page
+    $('[data-toggle="tooltip"]').tooltip();
+    $('h1.trigger-popup').html('All News');
+    displayArticles(-100);
+
+    var slider = $("#ex12a").slider({ id: "slider12a", min: -100, max: 100, value: -100, step: 20 });
+    //console.log(slider);
+    $('.slider .tooltip.top').css('margin-top', '-27px');
 
     // Setup global vars
     var sources = [];
@@ -30,8 +37,10 @@ $(document).ready(function() {
         var newVal = event.value.newValue;
         if (newVal <= -10) {
            $('h1.trigger-popup').html('All News');
+            $('div.slider-track-high').css('background-color', 'red');
         } else if (newVal > -10) {
             $('h1.trigger-popup').html('Good News');
+            $('div.slider-track-high').css('background-color', 'green');
         }
 
         displayArticles(newVal);
@@ -40,7 +49,7 @@ $(document).ready(function() {
     function displayArticles(minSentiment) {
         $('.article').each(function( index ) {
            var $art = $( this );
-           sentiment = $art.find('.featuredImage h3').text();
+           sentiment = $art.find('.sentiment-value').text();
 
            if ( sentiment <= minSentiment ) {
                $art.hide();
@@ -54,30 +63,48 @@ $(document).ready(function() {
         var $artParent = $(this);
 
         // Only do popup if they did not click on the anchor to view the article
-        if(event.target.nodeName !== "H3") {
-            $('#element_to_pop_up').bPopup({
-                content:'image', //'ajax', 'iframe' or 'image'
-                contentContainer:'.pop-image',
-                loadUrl: $artParent.find('img').attr('src')
-            });
+        if(event.target.nodeName !== "H3" && event.target.nodeName !== "IMG") {
+            console.log($artParent);
+            $('#element_to_pop_up2').modal('show');
+            $('.modal-title').text($artParent.find('a.articleTitle').text());
 
-            $('.pop-title').text($artParent.find('a.articleTitle').text());
-            $('.pop-synopsis').text($artParent.find('.articleSynopsis').text());
-            $('.pop-url').attr('href', $artParent.find('a.articleTitle').attr('href'));
-
-            var img = $('.pop-image img')[0];
-            //console.log(img.naturalHeight + " " + img.height);
-
+            var $img = $('.modal-image img');
+            $img.attr('src', $artParent.find('img').attr('src'));
             var targetHeight = 600;
-            //if(img.naturalHeight > targetHeight) {
-                var newPct = Math.floor(100 * targetHeight/img.height);
-                //console.log("height > targetHeight so changing to " + newPct + '%');
-                $(img).width( ((newPct > 100) ? 100 : newPct) + '%');
-            //}
+            var newPct = Math.floor(100 * targetHeight/$img.height);
+            //console.log("height > targetHeight so changing to " + newPct + '%');
+            $img.width( ((newPct > 100) ? 100 : newPct) + '%');
+
+            $('.modal-synopsis').text($artParent.find('.articleSynopsis').text());
+            $('.modal-url').attr('href', $artParent.find('a.articleTitle').attr('href'));
         }
-
-
     });
+
+    $(document).on('click', '.modal-url', function(event) {
+        $('#element_to_pop_up2').modal('hide');
+    });
+
+    function doBpopupModal() {
+        $('#element_to_pop_up').bPopup({
+            content:'image', //'ajax', 'iframe' or 'image'
+            contentContainer:'.pop-image',
+            loadUrl: $artParent.find('img').attr('src')
+        });
+
+        $('.pop-title').text($artParent.find('a.articleTitle').text());
+        $('.pop-synopsis').text($artParent.find('.articleSynopsis').text());
+        $('.pop-url').attr('href', $artParent.find('a.articleTitle').attr('href'));
+
+        //var img = $('.pop-image img')[0];
+        //console.log(img.naturalHeight + " " + img.height);
+
+        var targetHeight = 600;
+        //if(img.naturalHeight > targetHeight) {
+        var newPct = Math.floor(100 * targetHeight/img.height);
+        //console.log("height > targetHeight so changing to " + newPct + '%');
+        $(img).width( ((newPct > 100) ? 100 : newPct) + '%');
+        //}
+    }
 
     $(document).on('click', 'ul.categories a', function() {
         //console.log("Clicked category " + $(this).html());
@@ -116,6 +143,11 @@ $(document).ready(function() {
         setTimeout(function() {
             window.open(href, '_blank');
         }, 300);
+    });
+
+    $(document).on('click', '.action-button', function() {
+        console.log("Clicked " + $(this).html());
+        // TODO do action
     });
 
     // TODO refactor to generically handle different menus
@@ -232,43 +264,17 @@ $(document).ready(function() {
     }
 
     function getSentimentScore(sourceId, resultArray) {
-        var $main = $('#main');
+
         for (var row in resultArray) {
+
             (function(index) {
                 var art = resultArray[index];
-                if (index <= 0) {
+                if (index <= 30) {
                     console.log("Starting ajax for article sentiment " + art.url);
-                    $.ajax({
-                        url: getUrlForNLU(art.url),
-                        username: getWatsonUsername(),
-                        password: getWatsonPassword(),
 
-                        success: function(results) {
-                            console.log(results);
-
-                            // if sentiment is exactly 0 then Watson could not read the article so set to unknown
-                            if(results.sentiment.document.score != 0) {
-                                art.sentiment = Math.floor(100 * results.sentiment.document.score);
-
-                                // Only add to the cache if there was a real sentiment score
-                                addToArticleCache(sourceId, art);
-                            } else {
-                                art.sentiment = 'Unavail';
-                            }
-                        },
-                        error: function(jqXHR, textStatus, errorThrown) {
-                            console.log(errorThrown);
-                        },
-                        complete: function(jqXHR, textStatus) {
-                            var article = formatArticle(createNewsApiArticle(sourceId, art));
-                            $main.append(article);
-                        },
-                        statusCode: {
-                            404: function() {
-                                console.log( "page not found" );
-                            }
-                        }
-                    });
+                    // See if the article has already had the sentiment calculated
+                    checkArticleCache(sourceId, resultArray[row]);
+                    // getSentimentFromWatson()
                 }
                 /*else {
                     //$.get("https://accesscontrolalloworiginall.herokuapp.com/http://digg.com/api/news/popular.json", function(results) {
@@ -280,12 +286,77 @@ $(document).ready(function() {
         }
     }
 
+    function getSentimentFromWatson(sourceId, art) {
+        var $main = $('#main');
+        $.ajax({
+            url: getUrlForNLU(art.url),
+            username: getWatsonUsername(),
+            password: getWatsonPassword(),
+
+            success: function(results) {
+                console.log(results);
+
+                // Watson returns an object with code = 429 if the API limit is exceeded 6 per minute
+                if (results.hasOwnProperty('code') && results.code == 429) {
+                    art.sentiment = 'Unavailable';
+                } else if(results.sentiment.document.score != 0) {
+                    // if sentiment is exactly 0 then Watson could not read the article so set to unknown
+                    var sent = Math.floor(100 * results.sentiment.document.score);
+                    art.sentiment = sent;
+
+                    // Only add to the cache if there was a real sentiment score
+                    addToArticleCache(sourceId, art);
+                } else {
+                    art.sentiment = 0;
+                }
+
+
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown);
+            },
+            complete: function(jqXHR, textStatus) {
+                var article = formatArticle(createNewsApiArticle(sourceId, art));
+                $main.append(article);
+            },
+            // TODO handle watson unavail or api max requests
+            statusCode: {
+                404: function() {
+                    console.log( "page not found" );
+                }
+            }
+        });
+    }
+
     function addToArticleCache(sourceId, art) {
-        artDbRef.child("1234567").set({
+        var encodedUrlKey = md5(art.url);
+        console.log(encodedUrlKey);
+
+        artDbRef.child(encodedUrlKey).set({
             article: art,
             sentiment: art.sentiment,
             publishedAt: art.publishedAt,
             sourceId: sourceId
+        });
+    }
+
+    function checkArticleCache(sourceId, art) {
+        var encodedUrlKey = md5(art.url);
+        //console.log(encodedUrlKey);
+        // TODO change to articles/
+        var artDbRef2 = database.ref('players/' + encodedUrlKey);
+        artDbRef2.once('value', function(data) {
+            console.log(data.val());
+            if (data.val() == null) {
+                // get sentiment
+                getSentimentFromWatson(sourceId, art)
+            } else {
+                // Display article as is
+                console.log('*** Displaying article from FireBase');
+                var article = formatArticle(createNewsApiArticle(sourceId, data.val().article));
+                var $main = $('#main');
+                $main.append(article);
+            }
         });
     }
 
@@ -307,9 +378,6 @@ $(document).ready(function() {
         var url = 'https://accesscontrolalloworiginall.herokuapp.com/';
         url += 'https://watson-api-explorer.mybluemix.net/natural-language-understanding/api/v1/analyze?version=2017-02-27&url=' + artUrl +
             '&features=sentiment&return_analyzed_text=false&clean=true&fallback_to_raw=true&concepts.limit=8&emotion.document=true&entities.limit=50&entities.emotion=false&entities.sentiment=false&keywords.limit=50&keywords.emotion=false&keywords.sentiment=false&relations.model=en-news&semantic_roles.limit=50&semantic_roles.entities=false&semantic_roles.keywords=false&sentiment.document=true';
-        //var url = 'https://accesscontrolalloworiginall.herokuapp.com/http://digg.com/api/news/popular.json';
-        //url = 'https://gateway.watsonplatform.net/natural-language-understanding/api/v1/analyze?version=2017-02-27&url=' + url +
-        //        '&features=sentiment&return_analyzed_text=false&clean=true&fallback_to_raw=true&concepts.limit=8&emotion.document=true&entities.limit=50&entities.emotion=false&entities.sentiment=false&keywords.limit=50&keywords.emotion=false&keywords.sentiment=false&relations.model=en-news&semantic_roles.limit=50&semantic_roles.entities=false&semantic_roles.keywords=false&sentiment.document=true';
         //console.log(url);
         return url;
     }
@@ -390,7 +458,7 @@ $(document).ready(function() {
             var mins = Math.floor( (new Date() - pubDate) / (1000 * 60) );
             // Do all calculations for
             if (mins < 120) {
-                timeSince =  mins + ' Minutes Ago';
+                timeSince =  Math.abs(mins) + ' Minutes Ago';
             } else if (mins < 2880) {
                 timeSince =  Math.floor(mins/60)+ ' Hours Ago';
             } else if (mins < 20160) {
@@ -412,36 +480,36 @@ $(document).ready(function() {
         art.category = dataRow.description;
         art.publishedAt = dataRow.publishedAt;
         art.impressions = formatPubDateAsTimeSinceNow(dataRow.publishedAt);
+        art.sourceName = dataRow.source.name;
         art.sentiment = dataRow.sentiment;
         return art;
     }
 
-    function createRedditArticle(sourceId, dataRow) {
-        //console.log(sourceId);
-        var art = new Article(sourceId);
-        art.url = dataRow.url;
-        art.thumbUrl = dataRow.thumbnail;
-        art.title = dataRow.title;
-        art.category = dataRow.subreddit;
-        art.impressions = dataRow.ups;
-        art.sentiment = "0.5";
-        return art;
-    }
     function formatArticle(article) {
+        console.log(article);
         var result =
-            '<article class="article trigger-popup"' + article.sourceId + '">' +
+            '<article class="article trigger-popup ' + article.sourceId + '" >' +
                 '<section class="featuredImage"> ' +
-                    //'<img src="' + article.preview.images[0].source.url + '" alt="" /> ' +
                     '<img src="' + article.thumbUrl + '" class="has-popup-image" /> ' +
-                    '<h3>' + article.sentiment + '</h3>' +
+
+                    '<h6 class="' + ((article.sentiment < 0) ? 'negative' : 'positive') + '">' + 'Sentiment'  + '</h6>' +
+            '<h6 class="' + ((article.sentiment < 0) ? 'negative' : 'positive') + ' sentiment-value">' + article.sentiment + '</h6>' +
                 '</section> ' +
                 '<section class="articleContent"> ' +
                     '<a href="' + article.url + '" class="articleTitle" target="_blank"><h3>' + article.title + '</h3></a> ' +
                     '<h6 class="articleSynopsis">' + article.category + '</h6> ' +
-
                 '</section> ' +
-                '<section class="impressions">' + article.impressions +
-                '</section> ' +
+                '<section class="impressions">' +
+                    '<h6>' + article.impressions + '</h6>'  +
+            '<h6>' + article.sourceName + '</h6>'  +
+                    '<span>' +
+                    '<a href="#" class="favorite" data-toggle="tooltip" title="Add to Favorites" class="action-button favorite ' + md5(article.url) + '"><img src="images/favorite.png" alt="" /></a>' +
+                    '<a href="#" class="read-later" data-toggle="tooltip" title="Read Later" class="action-button read-later ' + md5(article.url) + '"><img src="images/read-later.png" alt="" /></a>' +
+                    '<a href="#" class="hide" data-toggle="tooltip" title="Hide" class="action-button remove ' + md5(article.url) + '"><img src="images/hide2.png" alt="" /></a>' +
+                    '<a href="#" class="up-vote" data-toggle="tooltip" title="Up Vote" class="action-button up-vote ' + md5(article.url) + '"><img src="images/up-vote.png" alt="" /></a>' +
+                    '<a href="#" class="down-vote" data-toggle="tooltip" title="Down Vote" class="action-button down-vote ' + md5(article.url) + '"><img src="images/down-vote3.png" alt="" /></a>' +
+                    '</span>' +
+            '</section> ' +
                 '<div class="clearfix"></div> ' +
             '</article>';
 

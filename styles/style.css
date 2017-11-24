@@ -16,6 +16,13 @@
 
 }
 
+#element_to_pop_up2 img {
+
+    min-width:20%;
+    min-height: 20%;
+    max-width: 100%;
+
+}
 
 .pop-content2222222 .pop-image {
   width: 80%;
@@ -109,7 +116,7 @@ header h1 {
   color: #FFF;
   padding: 10px 2%;
   margin: 0;
-  width: 26%;
+  width: 20%;
   float: left;
   padding-left: 0;
 }
@@ -117,7 +124,7 @@ header h1 {
 /* Header navigation bar */
 header nav {
   padding: 10px 2%;
-  width: 66%;
+  width: 72%;
   float: right;
   text-align: right;
   line-height: 30px;
@@ -243,6 +250,32 @@ nav ul ul li {
     max-width: 60px;
 }
 
+
+.article .featuredImage h5 {
+
+    font-size: 14px;
+    text-align: center;
+}
+.article .featuredImage .negative {
+    color: red;
+    text-align: center;
+    font-size: 14px;
+}
+
+.slider {
+    max-width: 150px;
+}
+
+.slider-label {
+    color: white;
+}
+
+.article .featuredImage .positive {
+    color: green;
+    text-align: center;
+    font-size: 14px;
+}
+
 .article .featuredImage img {
   max-width: 100%;
   border-radius: 50px;
@@ -290,3 +323,7 @@ nav ul ul li {
     background: yellow;
 }
 
+.action-button img {
+    width: 25px;
+
+}

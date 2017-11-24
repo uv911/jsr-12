@@ -4,6 +4,8 @@
     <head>
       <meta charset="utf-8">
       <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <!-- From Bootstrap TODO try this out-->
+        <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
       <title>Good News</title>
 
       <!-- Latest compiled and minified CSS -->
@@ -30,10 +32,10 @@
             <a href="#"><h1 class="trigger-popup">Good News</h1></a>
             <nav>
               <ul>
-                  <li>
+                  <li class="slider-label">
                       <!-- Single-value slider, high track: -->
-                      Min Rating
-                      <input id="ex12a" type="text"/><br/>
+                      Sentiment&nbsp;&nbsp;
+                      <input class="slider" id="ex12a" type="text"/><br/>
 
                   </li>
                 <li><a href="#" class="selected-category"></a>
@@ -61,7 +63,31 @@
             <h1 class="pop-title"></h1>
             <div class="pop-image"></div>
             <h6 class="pop-synopsis"></h6>
-            <h3><a href="#" class="pop-url" target="_blank">Read full article</a></h3>
+            <h3><a href="#" class="modal-url" target="_blank">Read full article</a></h3>
+        </div>
+
+        <!-- Bootstrap Modal -->
+        <div class="modal fade" id="element_to_pop_up2" role="dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h1 class="modal-title">Modal Header</h1>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="modal-image">
+                            <img src="#"/>
+                        </div>
+                        <h4 class="modal-synopsis"></h4>
+                        <h3><a href="#" class="modal-url" target="_blank">Read full article</a></h3>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!--<div id="popUp" class="loader hidden">
@@ -140,6 +166,7 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/bootstrap-slider.min.js"></script>
         <script src="js/jquery.bpopup.min.js"></script>
+        <script src="js/md5.js"></script>
         <script src="js/apiKeys.js"></script>
         <script src="js/app.js"></script>
 
