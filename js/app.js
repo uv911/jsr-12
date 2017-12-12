@@ -17,20 +17,22 @@ firebase.initializeApp(getFireBaseApiConfig());
 var database = firebase.database();
 var artDbRef = database.ref('players/');
 
+
 $(document).ready(function() {
     // DOM is now ready
 
     // Enable tooltips for the whole page
     $('[data-toggle="tooltip"]').tooltip();
-    $('h1.trigger-popup').html('All News');
+    $('h1.trigger-popup').html('Positive News');
     displayArticles(-100);
 
-    var slider = $("#ex12a").slider({ id: "slider12a", min: -100, max: 100, value: -100, step: 20 });
+    var slider = $("#ex12a").slider({ id: "slider12a", min: -100, max: 100, value: 0, step: 20 });
     //console.log(slider);
     $('.slider .tooltip.top').css('margin-top', '-27px');
 
     // Setup global vars
     var sources = [];
+    var userArtDbRef = setupUserArticlesDbRef('abc1234@yahoo.com');
 
     $("#ex12a").on('change', function(event) {
         //console.log(event.value.newValue);
@@ -39,7 +41,7 @@ $(document).ready(function() {
            $('h1.trigger-popup').html('All News');
             $('div.slider-track-high').css('background-color', 'red');
         } else if (newVal > -10) {
-            $('h1.trigger-popup').html('Good News');
+            $('h1.trigger-popup').html('Positive News');
             $('div.slider-track-high').css('background-color', 'green');
         }
 
@@ -146,9 +148,21 @@ $(document).ready(function() {
     });
 
     $(document).on('click', '.action-button', function() {
-        console.log("Clicked " + $(this).html());
-        // TODO do action
+        console.log(this);
+        var $art = $(this).closest('.article');
+        var action = $(this).find('img').attr('class');
+
+        addToArticleUserActionCache($art.find('a.articleTitle').attr('href'), action)
+
+        if(action === 'remove' || action === 'down-vote') {
+            $art.remove();
+        }
+
     });
+
+    function setupUserArticlesDbRef(userId) {
+        return database.ref('userArticles/' + md5(userId));
+    }
 
     // TODO refactor to generically handle different menus
     function handleCategoryClick(menuitem) {
@@ -360,6 +374,14 @@ $(document).ready(function() {
         });
     }
 
+    function addToArticleUserActionCache(artUrl, action) {
+        var encodedUrlKey = md5(artUrl);
+        console.log(encodedUrlKey);
+        var obj = { };
+        obj[action] = true;
+        userArtDbRef.child(encodedUrlKey).update(obj);
+    }
+
     function getUrlForStoryType(storyType) {
         var url = '';
         if (storyType.toLowerCase() === "top") {
@@ -492,22 +514,22 @@ $(document).ready(function() {
                 '<section class="featuredImage"> ' +
                     '<img src="' + article.thumbUrl + '" class="has-popup-image" /> ' +
 
-                    '<h6 class="' + ((article.sentiment < 0) ? 'negative' : 'positive') + '">' + 'Sentiment'  + '</h6>' +
-            '<h6 class="' + ((article.sentiment < 0) ? 'negative' : 'positive') + ' sentiment-value">' + article.sentiment + '</h6>' +
+                    '<h6 class="' + ((article.sentiment < 0) ? 'negative' : 'positive') + '">' + ((article.sentiment < 0) ? 'Negativity' : 'Positivity')  + '</h6>' +
+                    '<h6 class="' + ((article.sentiment < 0) ? 'negative' : 'positive') + ' sentiment-value">' + article.sentiment + '</h6>' +
                 '</section> ' +
                 '<section class="articleContent"> ' +
-                    '<a href="' + article.url + '" class="articleTitle" target="_blank"><h3>' + article.title + '</h3></a> ' +
+                    '<a href="' + article.url + '" class="articleTitle" target="_blank"><h3 class="' + ((article.sentiment < 0) ? 'negative' : 'positive') + '">' + article.title + '</h3></a> ' +
                     '<h6 class="articleSynopsis">' + article.category + '</h6> ' +
                 '</section> ' +
                 '<section class="impressions">' +
                     '<h6>' + article.impressions + '</h6>'  +
             '<h6>' + article.sourceName + '</h6>'  +
                     '<span>' +
-                    '<a href="#" class="favorite" data-toggle="tooltip" title="Add to Favorites" class="action-button favorite ' + md5(article.url) + '"><img src="images/favorite.png" alt="" /></a>' +
-                    '<a href="#" class="read-later" data-toggle="tooltip" title="Read Later" class="action-button read-later ' + md5(article.url) + '"><img src="images/read-later.png" alt="" /></a>' +
-                    '<a href="#" class="hide" data-toggle="tooltip" title="Hide" class="action-button remove ' + md5(article.url) + '"><img src="images/hide2.png" alt="" /></a>' +
-                    '<a href="#" class="up-vote" data-toggle="tooltip" title="Up Vote" class="action-button up-vote ' + md5(article.url) + '"><img src="images/up-vote.png" alt="" /></a>' +
-                    '<a href="#" class="down-vote" data-toggle="tooltip" title="Down Vote" class="action-button down-vote ' + md5(article.url) + '"><img src="images/down-vote3.png" alt="" /></a>' +
+                    '<a href="#" data-toggle="tooltip" title="Add to Favorites" class="action-button"><img class="favorite" src="images/favorite2.png" alt="" /></a>' +
+                    '<a href="#" data-toggle="tooltip" title="Add to Read Later List" class="action-button "><img class="read-later" src="images/read-later-list2.png" alt="" /></a>' +
+                    '<a href="#" data-toggle="tooltip" title="Don\'t Show Again" class="action-button"><img class="remove" src="images/remove.png" alt="" /></a>' +
+                    '<a href="#" data-toggle="tooltip" title="Up Vote" class="action-button"><img class="up-vote" src="images/up-vote.png" alt="" /></a>' +
+                    '<a href="#" data-toggle="tooltip" title="Down Vote" class="action-button"><img class="down-vote" src="images/down-vote3.png" alt="" /></a>' +
                     '</span>' +
             '</section> ' +
                 '<div class="clearfix"></div> ' +

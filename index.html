@@ -6,7 +6,7 @@
       <meta http-equiv="x-ua-compatible" content="ie=edge">
         <!-- From Bootstrap TODO try this out-->
         <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
-      <title>Good News</title>
+      <title>Positive News</title>
 
       <!-- Latest compiled and minified CSS -->
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -29,12 +29,13 @@
 
         <header>
           <section class="container">
-            <a href="#"><h1 class="trigger-popup">Good News</h1></a>
+            <a href="#"><h1 class="trigger-popup">Positive News</h1></a>
+
             <nav>
               <ul>
                   <li class="slider-label">
                       <!-- Single-value slider, high track: -->
-                      Sentiment&nbsp;&nbsp;
+                      Positivity&nbsp;&nbsp;
                       <input class="slider" id="ex12a" type="text"/><br/>
 
                   </li>
@@ -49,14 +50,32 @@
                 <li><a href="#" class="selected-story-type"></a>
                     <ul class="story-type"></ul>
                 </li>
+                  <li>
+                      <a href="#"><img class="search-icon" src="images/search.png" alt="" /></a>
+                      <ul><li><input type="text" name="name" value="Test"></li>
+
+                      </ul>
+                  </li>
+                  <li>
+                      <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                      <!--<a href="#"><img class="search-icon" src="images/user2.png" alt="" /></a>-->
+                      <ul><li><input type="text" name="name" value="Test"></li>
+
+                      </ul>
+                  </li>
               </ul>
-              <section id="search">
-                <input type="text" name="name" value="">
-                <a href="#"><img src="images/search.png" alt="" /></a>
-              </section>
+
+
+
             </nav>
+
+              <!--
             <div class="clearfix"></div>
           </section>
+            <section id="search">
+
+            </section>
+            -->
         </header>
 
         <div id="element_to_pop_up" class="pop-content">
